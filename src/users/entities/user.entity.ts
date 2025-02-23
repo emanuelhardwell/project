@@ -1,4 +1,4 @@
-import { IUser } from 'src/interfaces/user.interface';
+import { IUser } from '../../interfaces/user.interface';
 import { BaseEntity, Column, Entity } from 'typeorm';
 import { ROLES } from '../../enums/roles.enum';
 

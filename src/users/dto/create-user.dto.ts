@@ -1,6 +1,6 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { ROLES } from 'src/enums/roles.enum';
-import { IUser } from 'src/interfaces/user.interface';
+import { ROLES } from '../../enums/roles.enum';
+import { IUser } from '../../interfaces/user.interface';
 
 export class CreateUserDto implements IUser {
   @IsNotEmpty()
