@@ -1,6 +1,7 @@
 import { IUser } from '../../interfaces/user.interface';
-import { BaseEntity, Column, Entity } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { ROLES } from '../../enums/roles.enum';
+import { BaseEntity } from '../../config/base.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity extends BaseEntity implements IUser {
