@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
@@ -12,8 +12,10 @@ export class UsersService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly handleError: HandleError,
-  ) {}
-  async create(createUserDto: CreateUserDto) {
+  ) {
+    this.handleError.setServiceName('UsersService');
+  }
+  async create(createUserDto: CreateUserDto): Promise<UserEntity> {
     try {
       const user = this.userRepository.create(createUserDto);
       const userSaved = await this.userRepository.save(user);
@@ -25,12 +27,29 @@ export class UsersService {
     }
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll(): Promise<UserEntity[]> {
+    try {
+      const users = await this.userRepository.find();
+      return users;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string): Promise<UserEntity> {
+    try {
+      const user: UserEntity = await this.userRepository
+        .createQueryBuilder('user')
+        .where({ id })
+        .getOne();
+
+      if (!user) {
+        throw new BadRequestException(`User with id: ${id} not found!`);
+      }
+      return user;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
