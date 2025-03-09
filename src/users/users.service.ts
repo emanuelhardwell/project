@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HandleError } from '../common/errors/handle-error';
@@ -52,13 +52,29 @@ export class UsersService {
     }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UpdateResult> {
+    try {
+      const user: UpdateResult = await this.userRepository.update(
+        id,
+        updateUserDto,
+      );
+      if (user.affected === 0) {
+        throw new BadRequestException(
+          `User to update with id: ${id} not found!`,
+        );
+      }
+      return user;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 
   async remove(id: string): Promise<DeleteResult> {
     try {
-      const user = await this.userRepository.delete(id);
+      const user: DeleteResult = await this.userRepository.delete(id);
 
       if (user.affected === 0) {
         throw new BadRequestException(
