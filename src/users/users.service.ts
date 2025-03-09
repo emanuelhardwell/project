@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HandleError } from '../common/errors/handle-error';
@@ -56,7 +56,19 @@ export class UsersService {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string): Promise<DeleteResult> {
+    try {
+      const user = await this.userRepository.delete(id);
+
+      if (user.affected === 0) {
+        throw new BadRequestException(
+          `User to delete with id: ${id} not found!`,
+        );
+      }
+
+      return user;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 }
