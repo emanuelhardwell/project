@@ -5,6 +5,7 @@ import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HandleError } from '../common/errors/handle-error';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -17,8 +18,9 @@ export class UsersService {
   }
   async create(createUserDto: CreateUserDto): Promise<UserEntity> {
     try {
-      const user = this.userRepository.create(createUserDto);
-      const userSaved = await this.userRepository.save(user);
+      createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
+
+      const userSaved = await this.userRepository.save(createUserDto);
       delete userSaved.password;
 
       return userSaved;
