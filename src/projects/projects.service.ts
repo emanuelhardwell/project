@@ -3,7 +3,7 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProjectEntity } from './entities/project.entity';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { HandleError } from '../common/errors/handle-error';
 
 @Injectable()
@@ -50,11 +50,36 @@ export class ProjectsService {
     }
   }
 
-  update(id: number, updateProjectDto: UpdateProjectDto) {
-    return `This action updates a #${id} project`;
+  async update(id: string, updateProjectDto: UpdateProjectDto) {
+    try {
+      const project: UpdateResult = await this.projectRepository.update(
+        id,
+        updateProjectDto,
+      );
+      if (project.affected === 0) {
+        throw new BadRequestException(
+          `Project to update with id: ${id} not found!`,
+        );
+      }
+      return project;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} project`;
+  async remove(id: string): Promise<DeleteResult> {
+    try {
+      const project: DeleteResult = await this.projectRepository.delete(id);
+
+      if (project.affected === 0) {
+        throw new BadRequestException(
+          `Project to delete with id: ${id} not found!`,
+        );
+      }
+
+      return project;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 }
