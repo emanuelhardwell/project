@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -24,12 +24,30 @@ export class ProjectsService {
     }
   }
 
-  findAll() {
-    return `This action returns all projects`;
+  async findAll(): Promise<ProjectEntity[]> {
+    try {
+      const projects = await this.projectRepository.find();
+      return projects;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} project`;
+  async findOne(id: string): Promise<ProjectEntity> {
+    try {
+      const project = await this.projectRepository
+        .createQueryBuilder('project')
+        .where({ id })
+        .getOne();
+
+      if (!project) {
+        throw new BadRequestException(`Project with id: ${id} not found!`);
+      }
+
+      return project;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 
   update(id: number, updateProjectDto: UpdateProjectDto) {
