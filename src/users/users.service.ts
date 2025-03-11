@@ -6,12 +6,16 @@ import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HandleError } from '../common/errors/handle-error';
 import * as bcrypt from 'bcrypt';
+import { UserToProjectDto } from './dto/user-to-project.dto';
+import { UsersProjectsEntity } from './entities/usersProjects.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(UsersProjectsEntity)
+    private readonly usersProjectsRepository: Repository<UsersProjectsEntity>,
     private readonly handleError: HandleError,
   ) {
     this.handleError.setServiceName('UsersService');
@@ -85,6 +89,18 @@ export class UsersService {
       }
 
       return user;
+    } catch (error) {
+      this.handleError.error(error);
+    }
+  }
+
+  async addUserToProject(
+    userToProjectDto: UserToProjectDto,
+  ): Promise<UsersProjectsEntity> {
+    try {
+      const userToProject =
+        await this.usersProjectsRepository.save(userToProjectDto);
+      return userToProject;
     } catch (error) {
       this.handleError.error(error);
     }
