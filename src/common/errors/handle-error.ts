@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { QueryFailedError } from 'typeorm';
+import { QueryFailedError, TypeORMError } from 'typeorm';
 
 @Injectable()
 export class HandleError {
@@ -19,6 +19,11 @@ export class HandleError {
 
     if (error instanceof QueryFailedError) {
       const message = `PostgreSQL Error: ${error.message} -- ${error.driverError?.detail}`;
+      throw new BadRequestException(message);
+    }
+
+    if (error instanceof TypeORMError) {
+      const message = `TypeORMError: ${error.message}`;
       throw new BadRequestException(message);
     }
 
