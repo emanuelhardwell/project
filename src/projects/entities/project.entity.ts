@@ -5,7 +5,7 @@ import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity({ name: 'projects' })
 export class ProjectEntity extends BaseEntity implements IProject {
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @Column()
