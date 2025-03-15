@@ -4,6 +4,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSourceConfig } from './config/data.source';
 import { ConfigModule } from '@nestjs/config';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ConfigModule } from '@nestjs/config';
     TypeOrmModule.forRoot({ ...DataSourceConfig }),
     UsersModule,
     ProjectsModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],
