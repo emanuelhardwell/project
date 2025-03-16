@@ -5,6 +5,8 @@ import { UserEntity } from '../users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { HandleError } from '../common/errors/handle-error';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { jwt } from './interfaces/jwt.interface';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +14,7 @@ export class AuthService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly handleError: HandleError,
+    private readonly jwtService: JwtService,
   ) {}
 
   async login(loginDto: LoginDto) {
@@ -36,6 +39,15 @@ export class AuthService {
       }
 
       return user;
+    } catch (error) {
+      this.handleError.error(error);
+    }
+  }
+
+  private async generateJWT(payload: jwt): Promise<string> {
+    try {
+      const jwt = await this.jwtService.signAsync(payload);
+      return jwt;
     } catch (error) {
       this.handleError.error(error);
     }
