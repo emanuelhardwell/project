@@ -38,15 +38,26 @@ export class AuthService {
         throw new BadRequestException(`Username or password invalid!`);
       }
 
-      return user;
+      delete user.password;
+      delete user.createdAt;
+      delete user.updatedAt;
+
+      return {
+        user,
+        access_token: this.generateJWT({
+          id: user.id,
+          name: user.name,
+          role: user.role,
+        }),
+      };
     } catch (error) {
       this.handleError.error(error);
     }
   }
 
-  private async generateJWT(payload: jwt): Promise<string> {
+  private generateJWT(payload: jwt): string {
     try {
-      const jwt = await this.jwtService.signAsync(payload);
+      const jwt = this.jwtService.sign(payload);
       return jwt;
     } catch (error) {
       this.handleError.error(error);
