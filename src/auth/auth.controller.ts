@@ -1,9 +1,9 @@
 import { Controller, Post, Body, UseGuards, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { AuthGuard } from './guards/auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
 import { jwt } from './interfaces/jwt.interface';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -14,7 +14,7 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard())
   @Get('profile')
   getProfile(@GetUser() user: jwt) {
     return user;
