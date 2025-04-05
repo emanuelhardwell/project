@@ -3,11 +3,13 @@ import {
   ExecutionContext,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { jwt } from '../interfaces/jwt.interface';
+import { IUser } from '../../interfaces/user.interface';
+import { Request } from 'express';
 
 export const GetUser = createParamDecorator(
-  (data: keyof jwt, context: ExecutionContext) => {
-    const user: jwt = context.switchToHttp().getRequest().user;
+  (data: keyof IUser, context: ExecutionContext) => {
+    const request: Request = context.switchToHttp().getRequest();
+    const user = request.user as IUser;
 
     if (!user) {
       throw new InternalServerErrorException('User not found in the request!');
