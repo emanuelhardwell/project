@@ -5,6 +5,8 @@ import { UserEntity } from '../users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { HandleError } from '../common/errors/handle-error';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { jwt } from './interfaces/jwt.interface';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +14,7 @@ export class AuthService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly handleError: HandleError,
+    private readonly jwtService: JwtService,
   ) {}
 
   async login(loginDto: LoginDto) {
@@ -35,7 +38,27 @@ export class AuthService {
         throw new BadRequestException(`Username or password invalid!`);
       }
 
-      return user;
+      delete user.password;
+      delete user.createdAt;
+      delete user.updatedAt;
+
+      return {
+        user,
+        access_token: this.generateJWT({
+          id: user.id,
+          name: user.name,
+          role: user.role,
+        }),
+      };
+    } catch (error) {
+      this.handleError.error(error);
+    }
+  }
+
+  private generateJWT(payload: jwt): string {
+    try {
+      const jwt = this.jwtService.sign(payload);
+      return jwt;
     } catch (error) {
       this.handleError.error(error);
     }
