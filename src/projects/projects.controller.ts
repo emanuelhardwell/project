@@ -11,6 +11,9 @@ import {
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { ACCESS_LEVEL, ROLES } from '../enums/roles.enum';
+import { Auth } from '../auth/decorators/auth.decorator';
+import { AccessLevelProtected } from '../auth/decorators/access-level-protected.decorator';
 
 @Controller('projects')
 export class ProjectsController {
@@ -31,6 +34,8 @@ export class ProjectsController {
     return this.projectsService.findOne(id);
   }
 
+  @Auth(ROLES.BASIC)
+  @AccessLevelProtected(ACCESS_LEVEL.MANTEINER)
   @Patch(':id')
   update(
     @Param('id', ParseUUIDPipe) id: string,
