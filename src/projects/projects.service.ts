@@ -5,6 +5,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ProjectEntity } from './entities/project.entity';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { HandleError } from '../common/errors/handle-error';
+import { UsersProjectsEntity } from '../users/entities/usersProjects.entity';
+import { ACCESS_LEVEL } from '../enums/roles.enum';
+import { UserEntity } from '../users/entities/user.entity';
 
 @Injectable()
 export class ProjectsService {
@@ -12,12 +15,23 @@ export class ProjectsService {
     @InjectRepository(ProjectEntity)
     private readonly projectRepository: Repository<ProjectEntity>,
     private readonly handleError: HandleError,
+    @InjectRepository(UsersProjectsEntity)
+    private readonly usersProjectsRepository: Repository<UsersProjectsEntity>,
   ) {
     this.handleError.setServiceName('ProjectsService');
   }
-  async create(createProjectDto: CreateProjectDto): Promise<ProjectEntity> {
+  async create(
+    createProjectDto: CreateProjectDto,
+    user: UserEntity,
+  ): Promise<ProjectEntity> {
     try {
       const project = await this.projectRepository.save(createProjectDto);
+
+      await this.usersProjectsRepository.save({
+        user,
+        project,
+        accessLevel: ACCESS_LEVEL.OWNER,
+      });
       return project;
     } catch (error) {
       this.handleError.error(error);
