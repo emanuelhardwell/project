@@ -14,14 +14,20 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 import { ACCESS_LEVEL, ROLES } from '../enums/roles.enum';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { AccessLevelProtected } from '../auth/decorators/access-level-protected.decorator';
+import { GetUser } from '../auth/decorators/get-user.decorator';
+import { UserEntity } from '../users/entities/user.entity';
 
 @Controller('projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
+  @Auth()
   @Post()
-  create(@Body() createProjectDto: CreateProjectDto) {
-    return this.projectsService.create(createProjectDto);
+  create(
+    @Body() createProjectDto: CreateProjectDto,
+    @GetUser() user: UserEntity,
+  ) {
+    return this.projectsService.create(createProjectDto, user);
   }
 
   @Get()
