@@ -25,12 +25,26 @@ export class TasksService {
     }
   }
 
-  findAll() {
-    return `This action returns all tasks`;
+  async findAll() {
+    try {
+      const tasks = await this.taskRepository.find();
+      return tasks;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} task`;
+  async findOne(id: string) {
+    try {
+      const queryBuilder = this.taskRepository.createQueryBuilder('Taks');
+      const task = await queryBuilder
+        .where({ id })
+        .leftJoinAndSelect('Taks.project', 'projectId')
+        .getOne();
+      return task;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 
   update(id: number, updateTaskDto: UpdateTaskDto) {
