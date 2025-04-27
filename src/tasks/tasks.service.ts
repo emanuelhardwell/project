@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { TaskEntity } from './entities/task.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HandleError } from '../common/errors/handle-error';
@@ -51,7 +51,19 @@ export class TasksService {
     return `This action updates a #${id} task`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} task`;
+  async remove(id: string): Promise<DeleteResult> {
+    try {
+      const task: DeleteResult = await this.taskRepository.delete(id);
+
+      if (task.affected === 0) {
+        throw new BadRequestException(
+          `Task to delete with id: ${id} not found!`,
+        );
+      }
+
+      return task;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 }
