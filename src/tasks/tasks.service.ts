@@ -47,6 +47,18 @@ export class TasksService {
     }
   }
 
+  async findOneById(id: string): Promise<TaskEntity> {
+    try {
+      const task: TaskEntity = await this.taskRepository.findOneBy({ id });
+      if (!task) {
+        throw new BadRequestException(`Task with id: ${id} not found!`);
+      }
+      return task;
+    } catch (error) {
+      this.handleError.error(error);
+    }
+  }
+
   update(id: number, updateTaskDto: UpdateTaskDto) {
     return `This action updates a #${id} task`;
   }
