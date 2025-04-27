@@ -59,8 +59,15 @@ export class TasksService {
     }
   }
 
-  update(id: number, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
+  async update(id: string, updateTaskDto: UpdateTaskDto): Promise<TaskEntity> {
+    try {
+      const task: TaskEntity = await this.findOneById(id);
+      this.taskRepository.merge(task, updateTaskDto);
+      const taskUpdated = await this.taskRepository.save(task);
+      return taskUpdated;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 
   async remove(id: string): Promise<DeleteResult> {
