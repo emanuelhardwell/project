@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
@@ -52,7 +56,7 @@ export class UsersService {
         .getOne();
 
       if (!user) {
-        throw new BadRequestException(`User with id: ${id} not found!`);
+        throw new NotFoundException(`User with id: ${id} not found!`);
       }
       return user;
     } catch (error) {
@@ -70,9 +74,7 @@ export class UsersService {
         updateUserDto,
       );
       if (user.affected === 0) {
-        throw new BadRequestException(
-          `User to update with id: ${id} not found!`,
-        );
+        throw new NotFoundException(`User to update with id: ${id} not found!`);
       }
       return user;
     } catch (error) {
@@ -85,9 +87,7 @@ export class UsersService {
       const user: DeleteResult = await this.userRepository.delete(id);
 
       if (user.affected === 0) {
-        throw new BadRequestException(
-          `User to delete with id: ${id} not found!`,
-        );
+        throw new NotFoundException(`User to delete with id: ${id} not found!`);
       }
 
       return user;
