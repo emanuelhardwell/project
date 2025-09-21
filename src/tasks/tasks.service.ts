@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { DeleteResult, Repository } from 'typeorm';
@@ -48,6 +52,11 @@ export class TasksService {
         .where({ id })
         .leftJoinAndSelect('Taks.project', 'projectId')
         .getOne();
+
+      if (!task) {
+        throw new NotFoundException(`Task with id: ${id} not found!`);
+      }
+
       return task;
     } catch (error) {
       this.handleError.error(error);
@@ -58,7 +67,7 @@ export class TasksService {
     try {
       const task: TaskEntity = await this.taskRepository.findOneBy({ id });
       if (!task) {
-        throw new BadRequestException(`Task with id: ${id} not found!`);
+        throw new NotFoundException(`Task with id: ${id} not found!`);
       }
       return task;
     } catch (error) {
@@ -82,9 +91,7 @@ export class TasksService {
       const task: DeleteResult = await this.taskRepository.delete(id);
 
       if (task.affected === 0) {
-        throw new BadRequestException(
-          `Task to delete with id: ${id} not found!`,
-        );
+        throw new NotFoundException(`Task to delete with id: ${id} not found!`);
       }
 
       return task;
