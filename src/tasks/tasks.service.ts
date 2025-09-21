@@ -18,6 +18,13 @@ export class TasksService {
 
   async create(createTaskDto: CreateTaskDto): Promise<TaskEntity> {
     try {
+      const taskSearch = await this.taskRepository.findBy({
+        name: createTaskDto.name,
+      });
+      if (taskSearch) {
+        throw new BadRequestException(`The name of this task already exists`);
+      }
+
       const task = await this.taskRepository.save(createTaskDto);
       return task;
     } catch (error) {
