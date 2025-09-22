@@ -70,7 +70,10 @@ export class ProjectsService {
     }
   }
 
-  async update(id: string, updateProjectDto: UpdateProjectDto) {
+  async update(
+    id: string,
+    updateProjectDto: UpdateProjectDto,
+  ): Promise<UpdateResult> {
     try {
       const project: UpdateResult = await this.projectRepository.update(
         id,

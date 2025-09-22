@@ -28,10 +28,10 @@ export class UsersService {
     try {
       createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
 
-      const userSaved = await this.userRepository.save(createUserDto);
-      delete userSaved.password;
+      const user = await this.userRepository.save(createUserDto);
+      delete user.password;
 
-      return userSaved;
+      return user;
     } catch (error) {
       this.handleError.error(error);
     }
