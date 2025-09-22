@@ -36,7 +36,7 @@ export class TasksService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<TaskEntity[]> {
     try {
       const tasks = await this.taskRepository.find();
       return tasks;
@@ -45,7 +45,7 @@ export class TasksService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<TaskEntity> {
     try {
       const queryBuilder = this.taskRepository.createQueryBuilder('Taks');
       const task = await queryBuilder
