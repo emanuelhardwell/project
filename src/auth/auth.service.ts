@@ -17,16 +17,19 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto): Promise<{
+    user: UserEntity;
+    access_token: string;
+  }> {
     try {
       const user = await this.userRepository
         .createQueryBuilder('user')
         .addSelect('user.password')
-        .where([{ username: loginDto.username }, { email: loginDto.username }])
+        .where([{ username: loginDto.username }, { email: loginDto.email }])
         .getOne();
 
       if (!user) {
-        throw new BadRequestException(`Username or password invalid!`);
+        throw new BadRequestException(`Username or Email or password invalid!`);
       }
 
       const validPaswword = await bcrypt.compare(
