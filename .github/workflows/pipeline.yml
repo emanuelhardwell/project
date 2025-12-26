@@ -1,25 +1,27 @@
 name: Deployment Pipeline
 
 on:
-    push:
-        branches:
-            - develop
-            - qa
-            - main
+  push:
+    branches:
+      - develop
+      - qa
+      - main
 
 jobs:
-    deploy:
-        runs-on: ubuntu-22.04
-        steps:
-            - uses: actions/checkout@v6
-              with:
-                  fetch-depth: 0
-            - uses: actions/setup-node@v6
-              with:
-                  node-version: 24
-                  #cache: "npm"
-            - name: Install dependencies
-              run: pnpm install
+  deploy:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          #cache: "npm"
+      - name: Install pnpm
+        run: npm add -g pnpm
+      - name: Install dependencies
+        run: pnpm install
 
-            - name: Run Eslint
-              run: pnpm run lint
+      - name: Run Eslint
+        run: pnpm run lint
