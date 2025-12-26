@@ -66,6 +66,8 @@ describe('ProjectsService', () => {
 
   it('debe estar definido', () => {
     expect(service).toBeDefined();
+    expect(projectRepository).toBeDefined();
+    expect(handleError).toBeDefined();
   });
 
   describe('findAll', () => {
