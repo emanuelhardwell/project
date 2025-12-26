@@ -5,7 +5,7 @@ import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HandleError } from '../common/errors/handle-error';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { UserToProjectDto } from './dto/user-to-project.dto';
 import { UsersProjectsEntity } from './entities/usersProjects.entity';
 
