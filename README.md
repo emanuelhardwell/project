@@ -93,3 +93,4 @@ $ pnpm run test:e2e
 $ pnpm run test:cov
 ```
 
+[![Deployment Pipeline](https://github.com/emanuelhardwell/project/actions/workflows/pipeline.yml/badge.svg)](https://github.com/emanuelhardwell/project/actions/workflows/pipeline.yml)
