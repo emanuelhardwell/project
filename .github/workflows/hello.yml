@@ -12,7 +12,7 @@ jobs:
         runs-on: ubuntu-22.04
         steps:
             - name: Echo the message
-              run: echo "Hola Mundo"
-            - name: Dime la fecha
+              run: echo "Hello world"
+            - name: Tell me the time
               run: date
             - run: ls -l
