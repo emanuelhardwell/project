@@ -2,10 +2,14 @@ name: Deployment Pipeline
 
 on:
   push:
-    branches:
+    branches: #forma 1
       - develop
       - qa
       - main
+
+  pull_request: #forma 2
+    branches: [develop, qa, main]
+    types: [opened, synchronize]
 
 jobs:
   deploy:
@@ -32,6 +36,7 @@ jobs:
         run: pnpm run test
 
       - name: Deploy to RENDER
+        if: ${{github.event_name == 'push'}}
         uses: JorgeLNJunior/render-deploy@v1.4.7
         with:
           service_id: ${{ secrets.RENDER_SERVICE_ID }}
