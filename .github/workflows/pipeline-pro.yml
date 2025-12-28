@@ -53,8 +53,8 @@ jobs:
         with:
           node-version: 24
           cache: 'pnpm'
-      - name: Install pnpm
-        run: npm add -g pnpm
+      #- name: Install pnpm
+        #run: npm add -g pnpm
       - name: Install dependencies
         run: pnpm install --no-optional
       - name: Build
@@ -78,8 +78,8 @@ jobs:
         with:
           node-version: 24
           cache: 'pnpm'
-      - name: Install pnpm
-        run: npm add -g pnpm
+      #- name: Install pnpm
+        #run: npm add -g pnpm
       - name: Install dependencies
         run: pnpm install --no-optional
       - uses: actions/download-artifact@v4
