@@ -33,8 +33,8 @@ jobs:
         with:
           node-version: 24
           cache: 'pnpm'
-      - name: Install pnpm
-        run: npm add -g pnpm
+      #- name: Install pnpm -- ya no se instala pnpm porque ya usamos la action pnpm/action-setup
+        #run: npm add -g pnpm
       - name: Install dependencies
         run: pnpm install --no-optional
       - name: Run Eslint
@@ -53,8 +53,8 @@ jobs:
         with:
           node-version: 24
           cache: 'pnpm'
-      - name: Install pnpm
-        run: npm add -g pnpm
+      #- name: Install pnpm
+        #run: npm add -g pnpm
       - name: Install dependencies
         run: pnpm install --no-optional
       - name: Build
@@ -78,8 +78,8 @@ jobs:
         with:
           node-version: 24
           cache: 'pnpm'
-      - name: Install pnpm
-        run: npm add -g pnpm
+      #- name: Install pnpm
+        #run: npm add -g pnpm
       - name: Install dependencies
         run: pnpm install --no-optional
       - uses: actions/download-artifact@v4
