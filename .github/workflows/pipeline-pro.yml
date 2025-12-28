@@ -84,9 +84,6 @@ jobs:
     needs: [testUnit]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - name: Deploy to RENDER
         if: ${{github.event_name == 'push'}}
         uses: JorgeLNJunior/render-deploy@v1.4.7
