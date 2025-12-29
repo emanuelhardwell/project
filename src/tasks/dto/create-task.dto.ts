@@ -5,9 +5,9 @@ import {
   IsUUID,
   MinLength,
 } from 'class-validator';
-import { STATUS_TASK } from 'src/enums/roles.enum';
-import { ITask } from 'src/interfaces/task.interface';
-import { ProjectEntity } from 'src/projects/entities/project.entity';
+import { STATUS_TASK } from '../../enums/roles.enum';
+import { ITask } from '../../interfaces/task.interface';
+import { ProjectEntity } from '../../projects/entities/project.entity';
 
 export class CreateTaskDto implements ITask {
   @IsNotEmpty()
