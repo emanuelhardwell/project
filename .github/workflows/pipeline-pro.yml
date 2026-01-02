@@ -88,9 +88,33 @@ jobs:
           path: dist
       - name: Test
         run: pnpm run test
+  testEndToEnd:
+    needs: [build, linter]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+      #- name: Install pnpm
+        #run: npm add -g pnpm
+      - name: Install dependencies
+        run: pnpm install --no-optional
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Test E2E
+        run: pnpm run test:e2e
 
   deploy:
-    needs: [testUnit]
+    needs: [testUnit, testEndToEnd]
     environment: develop
     runs-on: ubuntu-22.04
     steps:
