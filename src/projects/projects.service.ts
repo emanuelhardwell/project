@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -57,7 +57,7 @@ export class ProjectsService {
         .getOne();
 
       if (!project) {
-        throw new BadRequestException(`Project with id: ${id} not found!`);
+        throw new NotFoundException(`Project with id: ${id} not found!`);
       }
 
       return project;
@@ -66,14 +66,17 @@ export class ProjectsService {
     }
   }
 
-  async update(id: string, updateProjectDto: UpdateProjectDto) {
+  async update(
+    id: string,
+    updateProjectDto: UpdateProjectDto,
+  ): Promise<UpdateResult> {
     try {
       const project: UpdateResult = await this.projectRepository.update(
         id,
         updateProjectDto,
       );
       if (project.affected === 0) {
-        throw new BadRequestException(
+        throw new NotFoundException(
           `Project to update with id: ${id} not found!`,
         );
       }
@@ -88,7 +91,7 @@ export class ProjectsService {
       const project: DeleteResult = await this.projectRepository.delete(id);
 
       if (project.affected === 0) {
-        throw new BadRequestException(
+        throw new NotFoundException(
           `Project to delete with id: ${id} not found!`,
         );
       }

@@ -1,11 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HandleError } from '../common/errors/handle-error';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { UserToProjectDto } from './dto/user-to-project.dto';
 import { UsersProjectsEntity } from './entities/usersProjects.entity';
 
@@ -24,10 +24,10 @@ export class UsersService {
     try {
       createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
 
-      const userSaved = await this.userRepository.save(createUserDto);
-      delete userSaved.password;
+      const user = await this.userRepository.save(createUserDto);
+      delete user.password;
 
-      return userSaved;
+      return user;
     } catch (error) {
       this.handleError.error(error);
     }
@@ -52,7 +52,7 @@ export class UsersService {
         .getOne();
 
       if (!user) {
-        throw new BadRequestException(`User with id: ${id} not found!`);
+        throw new NotFoundException(`User with id: ${id} not found!`);
       }
       return user;
     } catch (error) {
@@ -70,9 +70,7 @@ export class UsersService {
         updateUserDto,
       );
       if (user.affected === 0) {
-        throw new BadRequestException(
-          `User to update with id: ${id} not found!`,
-        );
+        throw new NotFoundException(`User to update with id: ${id} not found!`);
       }
       return user;
     } catch (error) {
@@ -85,9 +83,7 @@ export class UsersService {
       const user: DeleteResult = await this.userRepository.delete(id);
 
       if (user.affected === 0) {
-        throw new BadRequestException(
-          `User to delete with id: ${id} not found!`,
-        );
+        throw new NotFoundException(`User to delete with id: ${id} not found!`);
       }
 
       return user;
