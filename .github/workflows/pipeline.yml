@@ -1,0 +1,48 @@
+name: Deployment Pipeline
+
+on:
+  push:
+    branches: #forma 1
+      - develop
+      - qa
+      - main
+
+  pull_request: #forma 2
+    branches: [develop, qa, main]
+    types: [opened, synchronize]
+
+jobs:
+  deploy:
+    if: false # <--- AQUÍ: Esto hace que el job se ignore por completo
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          #cache: "npm"
+      - name: Install pnpm
+        run: npm add -g pnpm
+      - name: Install dependencies
+        run: pnpm install --no-optional
+      #run: npm install --no-audit --no-fund --no-optional
+
+      - name: Run Eslint
+        run: pnpm run lint
+      - name: Build
+        run: pnpm run build
+      - name: Test
+        run: pnpm run test
+
+      - name: Deploy to RENDER
+        if: ${{github.event_name == 'push'}}
+        uses: JorgeLNJunior/render-deploy@v1.4.7
+        with:
+          service_id: ${{ secrets.RENDER_SERVICE_ID }}
+          api_key: ${{ secrets.RENDER_API_KEY }}

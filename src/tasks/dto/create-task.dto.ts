@@ -1,6 +1,13 @@
-import { IsEnum, IsNotEmpty, IsString, MinLength } from 'class-validator';
-import { STATUS_TASK } from 'src/enums/roles.enum';
-import { ITask } from 'src/interfaces/task.interface';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  IsUUID,
+  MinLength,
+} from 'class-validator';
+import { STATUS_TASK } from '../../enums/roles.enum';
+import { ITask } from '../../interfaces/task.interface';
+import { ProjectEntity } from '../../projects/entities/project.entity';
 
 export class CreateTaskDto implements ITask {
   @IsNotEmpty()
@@ -21,4 +28,7 @@ export class CreateTaskDto implements ITask {
   @IsString()
   @MinLength(2)
   responsableName: string;
+
+  @IsUUID()
+  project: ProjectEntity;
 }

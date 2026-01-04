@@ -40,7 +40,7 @@ export class ProjectsController {
     return this.projectsService.findOne(id);
   }
 
-  @Auth(ROLES.BASIC)
+  @Auth(ROLES.ADMIN)
   @AccessLevelProtected(ACCESS_LEVEL.MANTEINER)
   @Patch(':id')
   update(

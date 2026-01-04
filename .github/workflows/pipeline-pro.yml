@@ -1,0 +1,135 @@
+name: Deployment Pipeline Parallel
+
+on:
+  push:
+    branches:
+      - develop
+      - qa
+      - main
+
+  pull_request:
+    branches: [develop, qa, main]
+    types: [opened, synchronize]
+
+jobs:
+  avoid_reduncy:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Cancel Previous Redundant Builds
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+  linter:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+      #- name: Install pnpm -- ya no se instala pnpm porque ya usamos la action pnpm/action-setup
+      #run: npm add -g pnpm
+      - name: Install dependencies
+        run: pnpm install --no-optional
+      - name: Run Eslint
+        run: pnpm run lint
+
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+      #- name: Install pnpm
+      #run: npm add -g pnpm
+      - name: Install dependencies
+        run: pnpm install --no-optional
+      - name: Build
+        run: pnpm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+  testUnit:
+    needs: [build, linter]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+      #- name: Install pnpm
+      #run: npm add -g pnpm
+      - name: Install dependencies
+        run: pnpm install --no-optional
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Test
+        run: pnpm run test
+  testEndToEnd:
+    needs: [build, linter]
+    environment: test
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+      #- name: Install pnpm
+      #run: npm add -g pnpm
+      - name: Install dependencies
+        run: pnpm install --no-optional
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Test E2E
+        run: pnpm run test:e2e
+        env:
+          JWT_SECRET: ${{secrets.JWT_SECRET}}
+          DB_NAME: ${{secrets.DB_NAME}}
+          DB_USER: ${{secrets.DB_USER}}
+          DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+          DB_HOST: ${{secrets.DB_HOST}}
+          DB_PORT: ${{secrets.DB_PORT}}
+
+  deploy:
+    needs: [testUnit, testEndToEnd]
+    environment: develop
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Deploy to RENDER
+        if: ${{github.event_name == 'push'}}
+        uses: JorgeLNJunior/render-deploy@v1.4.7
+        with:
+          service_id: ${{ secrets.RENDER_SERVICE_ID }}
+          api_key: ${{ secrets.RENDER_API_KEY }}
+          wait_deploy: true

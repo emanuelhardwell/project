@@ -21,6 +21,7 @@ export const DataSourceConfig: DataSourceOptions = {
   migrationsRun: true,
   logging: false,
   namingStrategy: new SnakeNamingStrategy(),
+  ssl: true //to RENDER 
 };
 
 export const AppDataSource = new DataSource(DataSourceConfig);

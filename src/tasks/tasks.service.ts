@@ -1,7 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { TaskEntity } from './entities/task.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HandleError } from '../common/errors/handle-error';
@@ -18,6 +22,13 @@ export class TasksService {
 
   async create(createTaskDto: CreateTaskDto): Promise<TaskEntity> {
     try {
+      const taskSearch = await this.taskRepository.findBy({
+        name: createTaskDto.name,
+      });
+      if (taskSearch) {
+        throw new BadRequestException(`The name of this task already exists`);
+      }
+
       const task = await this.taskRepository.save(createTaskDto);
       return task;
     } catch (error) {
@@ -25,19 +36,67 @@ export class TasksService {
     }
   }
 
-  findAll() {
-    return `This action returns all tasks`;
+  async findAll(): Promise<TaskEntity[]> {
+    try {
+      const tasks = await this.taskRepository.find();
+      return tasks;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} task`;
+  async findOne(id: string): Promise<TaskEntity> {
+    try {
+      const queryBuilder = this.taskRepository.createQueryBuilder('Taks');
+      const task = await queryBuilder
+        .where({ id })
+        .leftJoinAndSelect('Taks.project', 'projectId')
+        .getOne();
+
+      if (!task) {
+        throw new NotFoundException(`Task with id: ${id} not found!`);
+      }
+
+      return task;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 
-  update(id: number, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
+  async findOneById(id: string): Promise<TaskEntity> {
+    try {
+      const task: TaskEntity = await this.taskRepository.findOneBy({ id });
+      if (!task) {
+        throw new NotFoundException(`Task with id: ${id} not found!`);
+      }
+      return task;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} task`;
+  async update(id: string, updateTaskDto: UpdateTaskDto): Promise<TaskEntity> {
+    try {
+      const task: TaskEntity = await this.findOneById(id);
+      this.taskRepository.merge(task, updateTaskDto);
+      const taskUpdated = await this.taskRepository.save(task);
+      return taskUpdated;
+    } catch (error) {
+      this.handleError.error(error);
+    }
+  }
+
+  async remove(id: string): Promise<DeleteResult> {
+    try {
+      const task: DeleteResult = await this.taskRepository.delete(id);
+
+      if (task.affected === 0) {
+        throw new NotFoundException(`Task to delete with id: ${id} not found!`);
+      }
+
+      return task;
+    } catch (error) {
+      this.handleError.error(error);
+    }
   }
 }
