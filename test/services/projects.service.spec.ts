@@ -8,6 +8,7 @@ import { ProjectsService } from '../../src/projects/projects.service';
 import { UsersProjectsEntity } from '../../src/users/entities/usersProjects.entity';
 import { Repository } from 'typeorm';
 import { mockProjectA, mockProjectB } from '../const/projects';
+import { DeleteResultProject } from '../interfaces/projects';
 
 describe('ProjectsService', () => {
   let service: ProjectsService;
@@ -17,6 +18,16 @@ describe('ProjectsService', () => {
   const mockProjects: ProjectEntity[] = [mockProjectA, mockProjectB];
   const mockProjectsEmpty: ProjectEntity[] = [];
   const mockProject: ProjectEntity = { ...mockProjectA };
+
+  const mockDeleteResult: DeleteResultProject = {
+    raw: mockProject,
+    affected: 1,
+  };
+
+  const mockDeleteResult404: DeleteResultProject = {
+    raw: mockProject,
+    affected: 0,
+  };
 
   const mockQueryBuilder = {
     where: jest.fn().mockReturnThis(),
@@ -28,6 +39,7 @@ describe('ProjectsService', () => {
   const mockProjectRepository = {
     find: jest.fn(),
     createQueryBuilder: jest.fn(() => mockQueryBuilder),
+    delete: jest.fn(),
   };
 
   const mockUsersProjectsRepository = {}; // No se usa en findAll, pero se inyecta
@@ -152,6 +164,47 @@ describe('ProjectsService', () => {
       mockQueryBuilder.getOne.mockRejectedValue(dbError);
 
       await expect(service.findOne(mockProject.id)).rejects.toThrow();
+
+      expect(mockHandleError.error).toHaveBeenCalledWith(dbError);
+    });
+  });
+
+  describe('create', () => {
+    it('debe eliminar un proyectos completo exitosamente', async () => {
+      mockProjectRepository.delete.mockResolvedValue(mockDeleteResult);
+
+      const result = await service.remove(mockDeleteResult.raw.id);
+
+      expect(result).toEqual(mockDeleteResult);
+      expect(mockProjectRepository.delete).toHaveBeenCalledTimes(1);
+      expect(mockProjectRepository.delete).toHaveBeenCalledWith(
+        mockDeleteResult.raw.id,
+      );
+    });
+
+    it('debe lanzar NotFoundException (vía handleError) si el proyecto no existe', async () => {
+      mockProjectRepository.delete.mockResolvedValue(mockDeleteResult404);
+
+      await expect(service.remove(mockDeleteResult404.raw.id)).rejects.toThrow(
+        BadRequestException,
+      );
+
+      expect(mockHandleError.error).toHaveBeenCalledWith(
+        expect.any(NotFoundException),
+      );
+
+      const errorPassed = mockHandleError.error.mock.calls[0][0];
+      expect(errorPassed).toBeInstanceOf(NotFoundException);
+      expect(errorPassed.message).toContain(
+        `Project to delete with id: ${mockDeleteResult404.raw.id} not found!`,
+      );
+    });
+
+    it('debe llamar a handleError ante un error de base de datos', async () => {
+      const dbError = new Error('DB Error');
+      mockProjectRepository.delete.mockRejectedValue(dbError);
+
+      await expect(service.remove(mockProject.id)).rejects.toThrow();
 
       expect(mockHandleError.error).toHaveBeenCalledWith(dbError);
     });
